@@ -1,0 +1,29 @@
+# Entornos virtuales de Python
+venv/
+venv310/
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuraciones locales
+.env
+.vscode/
+
+# Archivos comprimidos
+*.zip
+*.rar
+*.7z
+
+# Ejecutables y librerías
+*.dll
+*.exe
+*.lib
+*.pdb
+
+# Carpetas pesadas del SDK
+OpenNI_*/
+OrbbecSDK_*/
+Log/
