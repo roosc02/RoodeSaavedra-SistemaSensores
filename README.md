@@ -1,40 +1,124 @@
-Sistema de Sensores para la Asistencia a la Conducción de un Automóvil
-
-Módulo de percepción visual
-
-Este repositorio contiene el desarrollo correspondiente al módulo de percepción visual del proyecto “Sistema de Sensores para la Asistencia a la Conducción de un Automóvil”, realizado como parte de la estancia de Verano Delfín en el Centro de Investigación en Computación del Instituto Politécnico Nacional.
-
-El trabajo se enfoca en la caracterización de una cámara Orbbec Astra, la adquisición de imágenes RGB, infrarrojas y de profundidad, la aplicación de filtros, el desarrollo de algoritmos de detección y orientación hacia objetos, y la preparación para pruebas físicas de evasión de obstáculos con un robot móvil referencial.
-
-Actividades principales
-
-* Caracterización de la cámara.
-* Especificación de sensores.
-* Aplicación de filtros de procesamiento de imagen.
-* Implementación de modelos de reconocimiento de objetos.
-* Generación de algoritmos de percepción.
-* Pruebas físicas de evasión de obstáculos.
+\# Sistema de Sensores para la Asistencia a la Conducción de un Automóvil
 
 
-Estado actual del proyecto
 
-Hasta el momento se han realizado pruebas de reconocimiento y comunicación con la cámara Orbbec Astra en Windows. El sistema operativo identifica correctamente el dispositivo y OpenNI permite acceder a diferentes flujos de datos.
-
-Funcionalidades comprobadas
-
-* Detección de la cámara Orbbec por medio del sistema operativo Windows.
-* Reconocimiento del dispositivo mediante OpenNI.
-* Adquisición del flujo infrarrojo.
-* Visualización de imagen infrarroja en Python.
-* Visualización del flujo RGB mediante OpenCV.
-* Aplicación de normalización y mapas de color.
-* Generación de indicaciones básicas de orientación hacia un objeto.
+Este repositorio contiene los avances del módulo de percepción visual desarrollado durante la estancia de verano en el CIC, dentro del proyecto \*\*Sistema de Sensores para la Asistencia a la Conducción de un Automóvil\*\*.
 
 
-Este proyecto es probado con Python 3.10 en el SO Windows. Se recomienta crear un entorno virtual antes de instalar las dependencias requeridas:
 
-py -3.10 -m venv venv310
-.\venv310\Scripts\Activate.ps1
+El trabajo se enfoca en el uso de una cámara para capturar información visual del entorno, aplicar filtros de procesamiento de imagen y preparar la base para tareas de detección de objetos, señales, obstáculos o elementos relevantes para la asistencia a la conducción.
+
+
+
+\## Objetivo
+
+
+
+Desarrollar y documentar pruebas de percepción visual mediante cámara, aplicando técnicas básicas de procesamiento de imágenes para mejorar la detección de elementos del entorno y reducir ruido visual.
+
+
+
+\## Alcance del repositorio
+
+
+
+Este repositorio incluye:
+
+
+
+\* Scripts de captura de video mediante cámara.
+
+\* Pruebas con imagen RGB, escala de grises y profundidad.
+
+\* Aplicación de filtros para mejorar la percepción visual.
+
+\* Evidencias de funcionamiento.
+
+\* Documentación del avance individual del módulo de cámara.
+
+
+
+\## Tecnologías utilizadas
+
+
+
+\* Python
+
+\* OpenCV
+
+\* Cámara RGB / cámara de profundidad
+
+\* Git y GitHub
+
+
+
+\## Estructura del proyecto
+
+
+
+
+
+RoodeSaavedra-SistemaSensores/
+
+│
+
+├── src/              # Scripts principales del proyecto
+
+├── tests/            # Pruebas realizadas
+
+├── evidencias/       # Imágenes o capturas de resultados
+
+├── requirements.txt  # Dependencias del proyecto
+
+└── README.md         # Documentación general
+
+
+
+
+
+\## Instalación de dependencias
+
+
+
+Para instalar las dependencias necesarias, se puede utilizar:
+
+
+
+
+
 pip install -r requirements.txt
 
-además es necesario instalar el controlador de la cámara Orbbec y disponer del SDK OpenNI compatible con su dispositivo.
+
+
+\## Ejecución
+
+
+
+Los scripts principales se encuentran en la carpeta `src`. Para ejecutar una prueba, se puede usar:
+
+
+
+python src/nombre\_del\_script.py
+
+
+
+
+
+\## Avances actuales
+
+
+
+Hasta el momento se han realizado pruebas iniciales de captura de imagen, visualización de cámara y procesamiento básico mediante filtros. Estos avances permiten sentar la base para una futura detección de objetos y elementos relevantes del entorno.
+
+
+
+\## Autor
+
+
+
+Roode Saavedra Carrera
+
+Estancia de verano — CIC
+
+
+
