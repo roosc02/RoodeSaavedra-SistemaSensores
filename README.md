@@ -1,6 +1,6 @@
 # Sistema de Sensores para la Asistencia a la Conducción de un Automóvil
 
-## Módulo de percepción visual mediante cámara RGB-D
+## Módulo de percepción visual mediante cámara RGB-D para la Asistencia a la Conducción
 
 Este repositorio contiene los avances individuales del módulo de percepción visual desarrollado durante la estancia de verano en el CIC, dentro del proyecto **Sistema de Sensores para la Asistencia a la Conducción de un Automóvil**.
 
@@ -10,7 +10,7 @@ El trabajo se enfoca en el uso de una cámara **Orbbec Astra+** para capturar in
 
 ## Objetivo
 
-Desarrollar y documentar pruebas iniciales de percepción visual mediante cámara RGB-D, obteniendo información de imagen y profundidad para preparar la base del procesamiento visual del sistema.
+Desarrollar y documentar pruebas de percepción visual mediante cámara RGB-D, obteniendo información de imagen y profundidad para preparar la base del procesamiento visual del sistema.
 
 El módulo busca mejorar la interpretación del entorno mediante técnicas de visión por computadora, reduciendo ruido visual y resaltando características importantes como contornos, colores, formas y posibles objetivos de interés.
 
@@ -81,12 +81,9 @@ La aplicación de filtros permitirá reducir ruido visual, resaltar elementos im
 
 Entre las pruebas consideradas se encuentran:
 
-* Conversión de imagen RGB a escala de grises.
 * Suavizado de imagen para reducción de ruido.
-* Aplicación de filtros de desenfoque.
-* Detección de bordes para resaltar contornos.
+* Aplicación de filtros Kalman para reducir ruido visual en la imagen y Canny para detección de bordes.
 * Segmentación por color.
-* Ajuste de umbrales.
 * Identificación de un objetivo por color específico.
 * Búsqueda de figuras o formas dentro de la imagen.
 * Análisis básico de profundidad.
@@ -96,7 +93,6 @@ Además de la captura RGB y de profundidad, se contempla el uso de técnicas de 
 
 Por ejemplo, el sistema podrá orientarse a la búsqueda de un objeto de color específico, una figura determinada o una región de interés dentro de la escena. Esto permitirá filtrar información no relevante del entorno y concentrar el análisis en elementos útiles para la asistencia a la conducción.
 
-Esta etapa se encuentra en preparación y será integrada progresivamente al repositorio conforme se realicen las pruebas correspondientes.
 
 ---
 
@@ -164,41 +160,6 @@ Este avance permite iniciar la obtención de datos visuales del entorno, tanto e
 
 Se documentó la etapa de procesamiento visual, en la cual se aplicarán filtros para mejorar la calidad de imagen, reducir ruido, detectar bordes y preparar los datos para futuras pruebas de segmentación por color, identificación de figuras y detección de objetos relevantes.
 
----
-
-## Estado actual
-
-| Área                                  | Estado         |
-| ------------------------------------- | -------------- |
-| Repositorio base                      | Completado     |
-| Documentación inicial                 | Completado     |
-| Captura RGB                           | En pruebas     |
-| Captura de profundidad                | En pruebas     |
-| Aplicación de filtros                 | En preparación |
-| Escala de grises                      | En preparación |
-| Detección de bordes                   | En preparación |
-| Segmentación por color                | En preparación |
-| Identificación de objetivos por color | En preparación |
-| Identificación de figuras o formas    | En preparación |
-| Evidencias visuales                   | Pendiente      |
-| Detección de objetos                  | Pendiente      |
-
----
-
-## Próximos pasos
-
-* Verificar el funcionamiento estable de la captura RGB.
-* Verificar la lectura de datos de profundidad.
-* Implementar pruebas en escala de grises.
-* Aplicar filtros básicos de procesamiento de imagen.
-* Probar filtros para reducción de ruido visual.
-* Implementar detección de bordes.
-* Realizar pruebas de segmentación por color.
-* Probar identificación de un objetivo por color específico.
-* Explorar detección de figuras o formas simples.
-* Documentar pruebas con capturas reales.
-* Agregar evidencias visuales obtenidas durante la ejecución.
-* Preparar futuras pruebas de detección de objetos.
 
 ---
 
@@ -208,8 +169,7 @@ Este repositorio corresponde al avance individual del módulo de cámara y perce
 
 ---
 
-## Autor
 
-**Roode Saavedra Carrera**
-Estancia de verano — CIC
+Autora: Roode Saavedra Carrera
+Estancia de verano — Instituto Politécnico Nacional CIC 
 Módulo individual: percepción visual mediante cámara
