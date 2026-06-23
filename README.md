@@ -171,8 +171,8 @@ Este repositorio corresponde al avance individual del módulo de cámara y perce
 
 
 Autora: Roode Saavedra Carrera
----
+-
 Estancia de verano — Instituto Politécnico Nacional CIC 
----
+-
 Módulo individual: percepción visual mediante cámara
----
+-
