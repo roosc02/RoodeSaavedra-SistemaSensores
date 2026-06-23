@@ -28,12 +28,12 @@ GitHub
 
 
 RoodeSaavedra-SistemaSensores/
-│
-├── src/              # Scripts principales del proyecto
-├── tests/            # Pruebas realizadas
-├── evidencias/       # Imágenes o capturas de resultados
-├── requirements.txt  # Dependencias del proyecto
-└── README.md         # Documentación general
+
+ src/              # Scripts principales del proyecto
+ tests/            # Pruebas realizadas
+ evidencias/       # Imágenes o capturas de resultados
+ requirements.txt  # Dependencias del proyecto
+ README.md         # Documentación general
 
 
  Instalación de dependencias
