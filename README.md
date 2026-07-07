@@ -1,20 +1,5 @@
 # Vision con Orbbec Astra+
 
-La aplicacion muestra una cuadricula 2x2:
-
-1. Bordes Canny de RGB sobre fondo negro.
-2. Ensamble RGB + profundidad alineada.
-3. Bordes de infrarrojo, suavizados temporalmente con Kalman.
-4. Opciones, telemetria y datos del objetivo.
-
-El panel de datos muestra resolucion, FPS, pixeles activos, pixeles detectados
-como borde, estadisticas del sensor, umbrales Canny, estado del objetivo y estado
-del ensamble RGB+profundidad.
-
-La aplicacion conserva los filtros temporales Kalman, los bordes Canny y el
-ensamble RGB+profundidad. Ademas incluye deteccion automatica y tracking de un
-solo señalamiento con YOLO-World + ByteTrack y captura coordinada RGB-D-IR
-para crear datasets.
 
 ## Ejecucion
 
@@ -30,19 +15,6 @@ En el primer arranque se crea `camera_config.json`. Verifica:
 - `depth_scale_mm`: milimetros por unidad de profundidad.
 - `fx`, `fy`, `cx`, `cy`: parametros intrinsecos RGB; inicialmente pueden ser `null`.
 
-## Controles
-
-- `Q` o `Esc`: salir.
-- `C`: guardar matrices originales RGB, profundidad e IR en un archivo `.npz`, ademas de PNG.
-- `P`: guardar la cuadricula completa.
-- `G`: guardar el ensamble manual RGB+profundidad en `camera_config.json`.
-- `1`, `2`, `3`: seleccionar ajustes Canny de RGB, profundidad o IR.
-- `A` / `Z`: aumentar o reducir el umbral Canny bajo.
-- `S` / `X`: aumentar o reducir el umbral Canny alto.
-- `I` / `K`: mover la profundidad alineada arriba / abajo.
-- `J` / `L`: mover la profundidad alineada izquierda / derecha.
-- `U` / `O`: reducir / aumentar la escala de profundidad sobre RGB.
-- `R`: reiniciar el ensamble manual.
 - Las trayectorias se inician automaticamente al estabilizar una señal de ALTO;
   no se necesita pulsar ninguna tecla. Cada una guarda 10 muestras del mismo
   `track_id`.
@@ -68,9 +40,8 @@ Configura estas opciones en `camera_config.json` si necesitas cambiarlas:
 }
 ```
 
-YOLO se inicia automaticamente buscando una señal de ALTO y la registra con la
-unica clase `senalamiento_trafico`; no se selecciona color, forma ni tipo desde
-la interfaz. Todas las etiquetas usan la clase `0`. Si aparecen varios
+YOLO se inicia automaticamente buscando una señal de vialidad color rojo y la registra con la
+unica clase `senalamiento_trafico`. Todas las etiquetas usan la clase `0`. Si aparecen varios
 candidatos, solo muestra y mide uno y mantiene su `track_id`.
 Los detectores anteriores por color y forma permanecen aislados en el codigo
 como referencia, pero no estan conectados al bucle principal ni tienen teclas
@@ -115,11 +86,6 @@ evidencias_pruebas/senalamiento_trafico/
     |-- evidencias_rgb/
     `-- trayectoria_final.jpg
 ```
-
-Las cajas generadas por un modelo preentrenado son pseudo-etiquetas: deben
-revisarse antes de entrenar o validar un modelo propio. La lectura de RGB,
-profundidad e IR se realiza en el mismo ciclo y el JSON registra el desfase
-observado; esto no equivale a sincronizacion hardware de los tres sensores.
 
 Los archivos de `calibration_data` no contienen bordes, mapas de color ni texto,
 por lo que pueden utilizarse posteriormente para calibracion.
