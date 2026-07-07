@@ -1,178 +1,190 @@
-# Sistema de Sensores para la Asistencia a la Conducción de un Automóvil
+# Vision con Orbbec Astra+
 
-## Módulo de percepción visual mediante cámara RGB-D para la Asistencia a la Conducción
+La aplicacion muestra una cuadricula 2x2:
 
-Este repositorio contiene los avances individuales del módulo de percepción visual desarrollado durante la estancia de verano en el CIC, dentro del proyecto **Sistema de Sensores para la Asistencia a la Conducción de un Automóvil**.
+1. Bordes Canny de RGB sobre fondo negro.
+2. Ensamble RGB + profundidad alineada.
+3. Bordes de infrarrojo, suavizados temporalmente con Kalman.
+4. Opciones, telemetria y datos del objetivo.
 
-El trabajo se enfoca en el uso de una cámara **Orbbec Astra+** para capturar información visual del entorno mediante imagen RGB y datos de profundidad. Esta etapa forma parte de la preparación del sistema de percepción para futuras pruebas de procesamiento de imagen, aplicación de filtros, detección de bordes, segmentación por color e identificación inicial de elementos relevantes en el entorno.
+El panel de datos muestra resolucion, FPS, pixeles activos, pixeles detectados
+como borde, estadisticas del sensor, umbrales Canny, estado del objetivo y estado
+del ensamble RGB+profundidad.
 
----
+La aplicacion conserva los filtros temporales Kalman, los bordes Canny y el
+ensamble RGB+profundidad. Ademas incluye deteccion automatica y tracking de un
+solo señalamiento con YOLO-World + ByteTrack y captura coordinada RGB-D-IR
+para crear datasets.
 
-## Objetivo
+## Ejecucion
 
-Desarrollar y documentar pruebas de percepción visual mediante cámara RGB-D, obteniendo información de imagen y profundidad para preparar la base del procesamiento visual del sistema.
+```powershell
+python -m pip install -r requirements.txt
+python orbbec_vision.py
+```
 
-El módulo busca mejorar la interpretación del entorno mediante técnicas de visión por computadora, reduciendo ruido visual y resaltando características importantes como contornos, colores, formas y posibles objetivos de interés.
+En el primer arranque se crea `camera_config.json`. Verifica:
 
----
+- `openni_path`: carpeta que contiene el runtime de OpenNI.
+- `rgb_index`: indice de la camara RGB. Para la RGB de la Orbbec normalmente es `0`.
+- `depth_scale_mm`: milimetros por unidad de profundidad.
+- `fx`, `fy`, `cx`, `cy`: parametros intrinsecos RGB; inicialmente pueden ser `null`.
 
-## Alcance actual del repositorio
+## Controles
 
-Actualmente, este repositorio incluye:
+- `Q` o `Esc`: salir.
+- `C`: guardar matrices originales RGB, profundidad e IR en un archivo `.npz`, ademas de PNG.
+- `P`: guardar la cuadricula completa.
+- `G`: guardar el ensamble manual RGB+profundidad en `camera_config.json`.
+- `1`, `2`, `3`: seleccionar ajustes Canny de RGB, profundidad o IR.
+- `A` / `Z`: aumentar o reducir el umbral Canny bajo.
+- `S` / `X`: aumentar o reducir el umbral Canny alto.
+- `I` / `K`: mover la profundidad alineada arriba / abajo.
+- `J` / `L`: mover la profundidad alineada izquierda / derecha.
+- `U` / `O`: reducir / aumentar la escala de profundidad sobre RGB.
+- `R`: reiniciar el ensamble manual.
+- Las trayectorias se inician automaticamente al estabilizar una señal de ALTO;
+  no se necesita pulsar ninguna tecla. Cada una guarda 10 muestras del mismo
+  `track_id`.
 
-* Código fuente para pruebas de captura con cámara.
-* Captura de imagen RGB.
-* Captura de información de profundidad.
-* Preparación para procesamiento en escala de grises.
-* Preparación para aplicación de filtros visuales.
-* Planeación de detección de bordes.
-* Planeación de segmentación por color.
-* Planeación de identificación de objetivos por color o figura.
-* Documentación del avance individual del módulo de cámara.
-* Organización inicial del repositorio para futuras pruebas de procesamiento visual.
+## YOLO y dataset RGB-D-IR
 
----
+Configura estas opciones en `camera_config.json` si necesitas cambiarlas:
 
-## Tecnologías utilizadas
+```json
+{
+  "yolo_model": "yolov8s-world.pt",
+  "yolo_target_class": "senalamiento_trafico",
+  "yolo_traffic_only": true,
+  "yolo_confidence": 0.02,
+  "yolo_iou": 0.5,
+  "yolo_device": "cpu",
+  "yolo_tracker_config": "bytetrack_stop.yaml",
+  "yolo_dataset_dir": "evidencias_pruebas/senalamiento_trafico",
+  "trajectory_samples": 10,
+  "trajectory_interval_seconds": 0.3,
+  "trajectory_auto_capture": true,
+  "trajectory_auto_stable_frames": 5
+}
+```
 
-| Tecnología           | Uso dentro del proyecto                                             |
-| -------------------- | ------------------------------------------------------------------- |
-| Python               | Desarrollo de scripts de captura y procesamiento                    |
-| OpenCV               | Visualización, manejo de imágenes, filtros y visión por computadora |
-| Cámara Orbbec Astra+ | Obtención de imagen RGB y profundidad                               |
-| Git                  | Control de versiones del proyecto                                   |
-| GitHub               | Respaldo, documentación y seguimiento de avances                    |
+YOLO se inicia automaticamente buscando una señal de ALTO y la registra con la
+unica clase `senalamiento_trafico`; no se selecciona color, forma ni tipo desde
+la interfaz. Todas las etiquetas usan la clase `0`. Si aparecen varios
+candidatos, solo muestra y mide uno y mantiene su `track_id`.
+Los detectores anteriores por color y forma permanecen aislados en el codigo
+como referencia, pero no estan conectados al bucle principal ni tienen teclas
+para activarlos.
 
----
+Para pruebas con una señal mostrada en un telefono, YOLO recibe internamente el
+RGB sin espejo aunque la interfaz siga mostrandose reflejada para conservar la
+calibracion. El prompt visual es `red octagonal traffic sign` y ByteTrack usa
+umbrales bajos adaptados a pantallas; la estabilidad de cinco cuadros limita
+falsos disparos.
+Tambien puedes indicar la ruta a tu propio `best.pt` en `yolo_model`; en ese caso
+sus nombres de clase deben describir señales de transito.
 
-## Estructura del proyecto
+Solo presenta la señal frente a la cámara. Tras cinco detecciones consecutivas,
+la aplicación inicia sola una trayectoria de 10 muestras. Cada trayectoria crea
+una carpeta independiente con:
+
+- RGB JPG y etiqueta YOLO normalizada;
+- profundidad cruda y profundidad alineada a RGB en PNG de 16 bits;
+- infrarrojo PNG;
+- matrices completas NPZ;
+- JSON por muestra con distancia, dimensiones, area, FPS, calibracion,
+  estadisticas y tiempos de lectura de los sensores;
+- RGB anotado con caja, confianza, Track ID, distancia y linea de trayectoria;
+- `trayectoria_final.jpg` con el recorrido completo;
+- `data.yaml` y resumen de trayectoria.
+
+La estructura principal se crea al iniciar:
 
 ```text
-RoodeSaavedra-SistemaSensores/
-│
-├── src/                              # Scripts principales del proyecto
-│   └── captura_rgb_profundidad.py    # Captura RGB y profundidad
-│
-├── tests/                            # Pruebas realizadas
-├── evidencias/                       # Capturas o resultados de pruebas
-├── requirements.txt                  # Dependencias del proyecto
-└── README.md                         # Documentación general
+evidencias_pruebas/senalamiento_trafico/
+|-- clase.txt
+|-- reportes/datos_sensores.csv
+`-- trayectorias/trajectory_.../
+    |-- images/
+    |-- labels/
+    |-- depth_raw/
+    |-- depth_aligned/
+    |-- ir/
+    |-- raw/
+    |-- metadata/
+    |-- evidencias_rgb/
+    `-- trayectoria_final.jpg
 ```
 
----
+Las cajas generadas por un modelo preentrenado son pseudo-etiquetas: deben
+revisarse antes de entrenar o validar un modelo propio. La lectura de RGB,
+profundidad e IR se realiza en el mismo ciclo y el JSON registra el desfase
+observado; esto no equivale a sincronizacion hardware de los tres sensores.
 
-## Script principal
+Los archivos de `calibration_data` no contienen bordes, mapas de color ni texto,
+por lo que pueden utilizarse posteriormente para calibracion.
 
-### `captura_rgb_profundidad.py`
+## Medicion y registro entre sensores
 
-El script `captura_rgb_profundidad.py` permite realizar pruebas iniciales de captura visual utilizando la cámara Orbbec Astra+.
+La distancia se toma como la mediana de profundidad dentro de la region del
+objetivo, pero usando `depth_aligned_to_rgb`, es decir, la profundidad ya llevada
+al plano RGB.
 
-Su propósito es obtener y visualizar información en formato RGB y profundidad, con el fin de comprobar el funcionamiento básico de la cámara y preparar el entorno para las siguientes etapas del proyecto.
+Si `fx` y `fy` estan configurados, se estiman ancho, alto y area en milimetros.
 
-Este script representa el primer avance práctico del módulo de percepción visual, ya que permite obtener datos visuales que posteriormente podrán utilizarse para aplicar filtros, detectar bordes, analizar profundidad y realizar segmentación visual.
+## Calibracion RGB + profundidad
 
----
+Usa un tablero de ajedrez plano. Los valores `cols` y `rows` son las esquinas
+internas, no los cuadros impresos. Por ejemplo, un tablero de 10x7 cuadros tiene
+9x6 esquinas internas.
 
-## Procesamiento visual, filtros y detección inicial
+1. Ejecuta la vision:
 
-Una de las etapas principales del proyecto consiste en aplicar filtros y técnicas básicas de procesamiento de imagen para mejorar la calidad de la información obtenida por la cámara.
+   ```powershell
+   python orbbec_vision.py
+   ```
 
-La aplicación de filtros permitirá reducir ruido visual, resaltar elementos importantes de la imagen y preparar los datos para futuras tareas de detección de objetos o análisis del entorno.
+2. Coloca el tablero en 12 a 25 posiciones diferentes:
 
-Entre las pruebas consideradas se encuentran:
+   - cerca, medio y lejos;
+   - inclinado hacia izquierda/derecha/arriba/abajo;
+   - ocupando centro, esquinas y bordes de la imagen.
 
-* Suavizado de imagen para reducción de ruido.
-* Aplicación de filtros Kalman para reducir ruido visual en la imagen y Canny para detección de bordes.
-* Segmentación por color.
-* Identificación de un objetivo por color específico.
-* Búsqueda de figuras o formas dentro de la imagen.
-* Análisis básico de profundidad.
-* Preparación de imágenes para detección de elementos relevantes.
+3. Antes de capturar, ajusta el ensamble visual con:
 
-Además de la captura RGB y de profundidad, se contempla el uso de técnicas de visión por computadora para enfocar la percepción en un objetivo determinado. Este objetivo puede definirse por características visuales como color, forma o contraste respecto al fondo.
+   - `J` / `L` para izquierda/derecha;
+   - `I` / `K` para arriba/abajo;
+   - `U` / `O` para escala.
 
-Por ejemplo, el sistema podrá orientarse a la búsqueda de un objeto de color específico, una figura determinada o una región de interés dentro de la escena. Esto permitirá filtrar información no relevante del entorno y concentrar el análisis en elementos útiles para la asistencia a la conducción.
+   Cuando se vea bien, presiona `G` para guardar ese ensamble.
 
+4. Presiona `C` en cada pose del tablero. Cada captura guarda:
 
----
+   - `rgb_bgr`;
+   - `depth_raw`;
+   - `depth_aligned_to_rgb`;
+   - `ir_raw`.
 
-## Flujo de trabajo propuesto
+5. Cierra la vision y calibra. Cambia `--square-mm` por el tamano real de cada
+   cuadro del tablero:
 
-```text
-Captura RGB y profundidad
-        ↓
-Conversión y preprocesamiento de imagen
-        ↓
-Aplicación de filtros
-        ↓
-Reducción de ruido visual
-        ↓
-Detección de bordes y contornos
-        ↓
-Segmentación por color o figura
-        ↓
-Identificación de posibles elementos relevantes
-        ↓
-Documentación de resultados
-```
+   ```powershell
+   python calibrate_rgb_depth.py --cols 9 --rows 6 --square-mm 25 --apply
+   ```
 
----
+El calibrador actualiza en `camera_config.json`:
 
-## Instalación de dependencias
+- `fx`, `fy`, `cx`, `cy` de RGB;
+- `rgb_dist_coeffs`;
+- `depth_scale_mm`, solo si la correccion sugerida esta dentro de un rango razonable.
 
-Para instalar las dependencias necesarias del proyecto, se puede utilizar:
+Ademas crea:
 
-```bash
-pip install -r requirements.txt
-```
+- `calibration_data\rgb_depth_calibration_report.json`;
+- `calibration_data\debug_corners\*_corners.png`.
 
----
-
-## Ejecución
-
-Los scripts principales se encuentran dentro de la carpeta `src/`.
-
-Para ejecutar el script de captura RGB y profundidad:
-
-```bash
-python src/captura_rgb_profundidad.py
-```
-
----
-
-## Avances realizados
-
-### 1. Configuración inicial del repositorio
-
-Se creó la estructura base del repositorio para organizar el código fuente, pruebas, evidencias y documentación general del proyecto.
-
-### 2. Documentación inicial del proyecto
-
-Se agregó una descripción general del proyecto, su objetivo, alcance, tecnologías utilizadas y estructura del repositorio.
-
-### 3. Captura RGB y profundidad
-
-Se agregó el script `captura_rgb_profundidad.py`, orientado a realizar pruebas iniciales de captura con la cámara Orbbec Astra+.
-
-Este avance permite iniciar la obtención de datos visuales del entorno, tanto en imagen RGB como en profundidad.
-
-### 4. Preparación para filtros y detección inicial
-
-Se documentó la etapa de procesamiento visual, en la cual se aplicarán filtros para mejorar la calidad de imagen, reducir ruido, detectar bordes y preparar los datos para futuras pruebas de segmentación por color, identificación de figuras y detección de objetos relevantes.
-
-
----
-
-## Notas del desarrollo
-
-Este repositorio corresponde al avance individual del módulo de cámara y percepción visual. La parte relacionada con LiDAR corresponde a otro integrante del proyecto, mientras que la calibración o integración entre cámara y LiDAR se trabajará posteriormente de forma conjunta.
-
----
-
-
-Autora: Roode Saavedra Carrera -
-
-Estancia de verano — Instituto Politécnico Nacional CIC -
-
-Módulo individual: percepción visual mediante cámara-
-
+Nota: esta calibracion usa `depth_aligned_to_rgb`, por lo que ya sirve para medir
+distancias y dimensiones en el plano RGB. Para una extrinseca fisica completa
+profundidad->RGB se necesitan tambien intrinsecos reales del sensor de profundidad
+y correspondencias visibles en profundidad, o los parametros de registro de fabrica
+del dispositivo.
