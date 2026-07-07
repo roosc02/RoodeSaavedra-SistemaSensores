@@ -1,29 +1,35 @@
-# Entornos virtuales de Python
+# Entornos virtuales
 venv/
+.venv/
 venv310/
+venv_orbbec_v1/
+env/
 
-# Caché de Python
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Configuraciones locales
-.env
-.vscode/
+# Logs y respaldos
+*.log
+*.bak
 
-# Archivos comprimidos
-*.zip
-*.rar
-*.7z
+# Modelos pesados
+*.pt
+*.onnx
+*.engine
 
-# Ejecutables y librerías
-*.dll
-*.exe
-*.lib
-*.pdb
+# Datasets, capturas y datos generados
+dataset_yolo26/
+captures/
+calibration_data/
+calibration_clean/
+evidencias_pruebas/
 
-# Carpetas pesadas del SDK
-OpenNI_*/
-OrbbecSDK_*/
-Log/
+# Configuración local
+camera_config.json
+
+# Sistema
+.DS_Store
+Thumbs.db
