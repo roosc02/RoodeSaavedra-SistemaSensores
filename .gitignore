@@ -33,3 +33,9 @@ camera_config.json
 # Sistema
 .DS_Store
 Thumbs.db
+
+# SDKs o librerías externas locales
+external/
+
+# Logs locales
+Log/
