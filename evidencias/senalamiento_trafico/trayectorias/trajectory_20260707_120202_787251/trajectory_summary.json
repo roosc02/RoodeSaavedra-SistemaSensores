@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "trajectory_20260707_120202_787251",
+  "target_label": "senalamiento_trafico",
+  "samples": 10,
+  "track_id": 12,
+  "completed": true,
+  "labels_are_pseudo_labels": true,
+  "trajectory_points_rgb": [
+    [
+      342,
+      249
+    ],
+    [
+      355,
+      225
+    ],
+    [
+      358,
+      227
+    ],
+    [
+      358,
+      227
+    ],
+    [
+      359,
+      228
+    ],
+    [
+      148,
+      191
+    ],
+    [
+      133,
+      180
+    ],
+    [
+      124,
+      189
+    ],
+    [
+      120,
+      191
+    ],
+    [
+      119,
+      190
+    ]
+  ]
+}
