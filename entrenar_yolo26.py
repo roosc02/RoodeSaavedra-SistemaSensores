@@ -1,21 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Entrena un modelo YOLO26 (Ultralytics) para detectar una sola clase,
-"senalamiento_trafico", usando el dataset generado por
-preparar_dataset_yolo26.py.
 
-Requisito (una sola vez):
-    pip install -U ultralytics
-
-Uso basico (usa yolo26n, el mas rapido, bueno para tiempo real / CPU):
-    python entrenar_yolo26.py
-
-Con mas control (ej. modelo mas grande y GPU explicita):
-    python entrenar_yolo26.py --modelo yolo26s.pt --epocas 250 --dispositivo 0
-
-La primera vez que corras esto, Ultralytics descargara automaticamente
-los pesos preentrenados de YOLO26 (necesitas internet esa vez).
-"""
 from __future__ import annotations
 
 import argparse
