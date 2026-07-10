@@ -1,224 +1,254 @@
-# Vision con Orbbec Astra+
+# Visión RGB-D con Orbbec Astra+
+## Detección de cubo rojo, medición de profundidad y empalme RGB-D
 
-La aplicacion muestra una cuadricula 2x2:
+Este repositorio contiene una aplicación de visión por computadora desarrollada para trabajar con una cámara **Orbbec Astra+**, utilizando captura RGB, lectura de profundidad, alineación RGB-D, segmentación por color y generación de evidencias visuales.
 
-1. Bordes Canny de RGB sobre fondo negro.
-2. Ensamble RGB + profundidad alineada.
-3. Bordes Canny de profundidad, suavizados temporalmente con Kalman.
-4. Opciones, telemetria y datos del objetivo.
+El sistema está orientado a pruebas iniciales de percepción visual para asistencia a la conducción, enfocándose en la detección de un objetivo específico, la medición de distancia mediante profundidad y la calibración visual entre la imagen RGB y el mapa de profundidad.
 
-El panel de datos muestra resolucion, FPS, pixeles activos, pixeles detectados
-como borde, estadisticas del sensor, umbrales Canny, estado del objetivo y estado
-del ensamble RGB+profundidad.
+---
 
-La aplicacion conserva los filtros temporales Kalman, los bordes Canny y el
-ensamble RGB+profundidad. Ademas incluye deteccion automatica y tracking de un
-objeto COCO con YOLO26 + ByteTrack y captura coordinada RGB-D para crear
-evidencias y datasets.
+## Descripción general
 
-## Ejecucion
+La aplicación principal permite capturar información visual mediante una cámara RGB y un sensor de profundidad. A partir de estos datos, el sistema identifica un **cubo rojo** dentro de la escena usando técnicas clásicas de visión por computadora.
+
+Esta versión **no utiliza YOLO** como detector principal. La detección se realiza mediante:
+
+* Segmentación por color en HSV.
+* Detección de contornos.
+* Análisis de forma.
+* Análisis de textura.
+* Validación con profundidad alineada.
+* Medición de distancia del objetivo.
+
+---
+## Uso de bordes Canny
+
+El sistema utiliza bordes Canny como herramienta de apoyo dentro del procesamiento visual.
+
+Canny se emplea principalmente para:
+
+- Resaltar contornos en la imagen RGB.
+- Apoyar la validación de la forma del cubo rojo.
+- Comparar bordes entre RGB y profundidad durante el empalme automático depth → RGB.
+- Mejorar la estimación de alineación entre ambos sensores.
+
+La detección principal del objetivo no depende únicamente de Canny, sino de la combinación de segmentación por color rojo, análisis de contornos, forma, textura y profundidad alineada.
+
+---
+
+## Objetivo
+
+Desarrollar un sistema de visión RGB-D con Orbbec Astra+ capaz de detectar un objetivo visual específico, estimar su distancia mediante profundidad y generar evidencias reales del funcionamiento del sistema.
+
+---
+
+## Características principales
+
+El sistema incluye:
+
+* Captura de imagen RGB.
+* Captura de profundidad mediante OpenNI.
+* Alineación de profundidad al plano RGB.
+* Detección de un cubo rojo mediante segmentación por color.
+* Detección de contornos y análisis de forma.
+* Estimación de textura del objetivo.
+* Medición de distancia usando profundidad alineada.
+* Filtros temporales tipo Kalman para suavizar RGB y profundidad.
+* Visualización de profundidad con mapa de color.
+* Ensamble visual RGB + profundidad.
+* Panel de datos del sensor y del objetivo.
+* Análisis básico de piso azul como zona transitable.
+* Captura automática de evidencias cuando se detecta el objetivo.
+* Calibración de empalme depth → RGB mediante puntos manuales.
+
+---
+
+## Funcionamiento general
+
+```text
+Captura RGB
+    ↓
+Captura de profundidad
+    ↓
+Suavizado temporal con Kalman
+    ↓
+Alineación de profundidad al plano RGB
+    ↓
+Segmentación del color rojo
+    ↓
+Detección de contornos y forma
+    ↓
+Validación con profundidad
+    ↓
+Estimación de distancia del objetivo
+    ↓
+Visualización y guardado de evidencias
+```
+
+---
+
+## Detección del objetivo
+
+El objetivo actual del sistema es un:
+
+```text
+cubo rojo
+```
+
+La detección se realiza mediante segmentación en el espacio de color HSV. 
+Después se aplican operaciones morfológicas para limpiar la máscara y se buscan contornos candidatos.
+
+Para seleccionar el objetivo, el sistema considera:
+
+* Área mínima del contorno.
+* Forma aproximada del objeto.
+* Bordes.
+* Textura.
+* Profundidad válida dentro de la región detectada.
+
+Si el objeto cuenta con suficiente información de profundidad, el sistema calcula su distancia aproximada respecto al sensor.
+
+---
+
+## Medición de profundidad
+
+La distancia del objetivo se calcula usando la profundidad alineada al plano RGB.
+
+El sistema toma los valores de profundidad dentro del contorno detectado y calcula una mediana para reducir el efecto de valores atípicos o ruido.
+
+También se registra la cantidad de píxeles válidos de profundidad dentro del objetivo, lo cual permite estimar si la medición es confiable o no.
+
+---
+
+## Empalme RGB + profundidad
+
+El sistema permite trabajar con una imagen de profundidad proyectada sobre el plano RGB. Para esto se contempla:
+
+* Alineación manual mediante desplazamiento y escala.
+* Alineación automática por bordes.
+* Alineación mediante homografía.
+* Alineación calibrada 3D, si se cuenta con parámetros intrínsecos y extrínsecos.
+
+El archivo `calibrar_empalme_depth_rgb.py` permite realizar una calibración visual mediante puntos equivalentes entre RGB y profundidad. El programa congela una escena, permite seleccionar puntos en ambos paneles y calcula una homografía para mejorar el empalme depth → RGB.
+
+---
+
+## Calibración de empalme depth → RGB
+
+Para ejecutar el calibrador visual:
+
+```powershell
+python calibrar_empalme_depth_rgb.py
+```
+
+```text
+orbbec_sencillo_config.json
+```
+
+---
+
+
+## Panel de visualización
+
+Durante la ejecución, la aplicación muestra cuatro paneles principales:
+
+1. **Sensor RGB + Kalman**
+   Imagen RGB suavizada con detección dibujada.
+
+2. **Sensor profundidad alineado**
+   Mapa de profundidad visualizado con colores.
+
+3. **Empalme RGB + profundidad**
+   Ensamble visual entre la imagen RGB y la profundidad alineada.
+
+4. **Datos reales del objetivo y sensores**
+   Panel con información del sensor, profundidad, estado del piso y datos del objetivo detectado.
+
+---
+
+## Evidencias de pruebas
+
+A continuación se muestran algunas capturas obtenidas durante las pruebas del sistema.
+
+### Captura RGB
+
+![Captura RGB](capturas_orbbec_sencillo/20260709_132443_homografia_cubo_rojo_2553mm_rgb.png)
+
+### Profundidad
+
+![Profundidad](capturas_orbbec_sencillo/20260709_132443_homografia_cubo_rojo_2553mm_profundidad.png)
+
+### Empalme RGB + profundidad
+
+![Empalme RGB profundidad](capturas_orbbec_sencillo/20260709_132443_homografia_cubo_rojo_2553mm_empalme.png)
+
+
+---
+
+## Captura automática de evidencias
+
+Cuando el sistema detecta el cubo rojo, puede guardar capturas automáticamente en la carpeta configurada.
+
+Por defecto, las evidencias se guardan en:
+
+```text
+capturas_orbbec_sencillo/
+```
+
+Las capturas generadas incluyen:
+
+* Imagen RGB con detección.
+* Imagen de profundidad.
+* Ensamble RGB + profundidad.
+
+---
+
+## Configuración
+
+El sistema utiliza el archivo:
+
+```text
+orbbec_sencillo_config.json
+```
+
+## Instalación
+
+Instala las dependencias necesarias con:
 
 ```powershell
 python -m pip install -r requirements.txt
-python orbbec_vision.py
 ```
 
-En el primer arranque se crea `camera_config.json`. Verifica:
+---
 
-- `openni_path`: carpeta que contiene el runtime de OpenNI.
-- `rgb_index`: indice de la camara RGB. Para la RGB de la Orbbec normalmente es `0`.
-- `depth_scale_mm`: milimetros por unidad de profundidad.
-- `fx`, `fy`, `cx`, `cy`: parametros intrinsecos RGB; inicialmente pueden ser `null`.
+## Ejecución
 
-## Navegacion y motores
+Para iniciar la aplicación principal:
 
-El proyecto incluye una capa de navegacion en `navegar.py` y un controlador de
-motores en `motores.py`. La navegacion usa profundidad alineada a RGB y
-detecciones YOLO para decidir:
-
-- `forward`: avanzar;
-- `slow`: avanzar lento;
-- `stop`: detener;
-- `turn_left`: girar a la izquierda;
-- `turn_right`: girar a la derecha.
-
-Los motores estan desactivados por defecto. En Raspberry Pi configura
-`camera_config.json` con pines GPIO BCM de tu puente H:
-
-```json
-{
-  "motor_enabled": true,
-  "motor_dry_run": true,
-  "motor_max_speed": 0.30,
-  "motor_left_forward_pin": 17,
-  "motor_left_backward_pin": 27,
-  "motor_right_forward_pin": 22,
-  "motor_right_backward_pin": 23
-}
+```powershell
+python orbbec_sencillo.py
 ```
 
-Primero deja `motor_dry_run` en `true`: veras la decision en pantalla sin mover
-el robot. Cuando confirmes que las decisiones son correctas, cambia
-`motor_dry_run` a `false`.
+Para ejecutar el calibrador de empalme RGB-D:
 
-Los valores por defecto estan pensados para un robot mini: velocidad moderada y
-frenado cercano. No conectes motores directo a los GPIO. Usa un driver de motor
-o puente H, fuente separada para motores y tierra comun entre Raspberry Pi y
-driver.
-
-## Controles
-
-- `Q` o `Esc`: salir.
-- `C`: guardar matrices originales RGB y profundidad en un archivo `.npz`, ademas de PNG.
-- `P`: guardar la cuadricula completa.
-- `G`: guardar el ensamble manual RGB+profundidad en `camera_config.json`.
-- `1`, `2`: seleccionar ajustes Canny de RGB o profundidad.
-- `A` / `Z`: aumentar o reducir el umbral Canny bajo.
-- `S` / `X`: aumentar o reducir el umbral Canny alto.
-- `I` / `K`: mover la profundidad alineada arriba / abajo.
-- `J` / `L`: mover la profundidad alineada izquierda / derecha.
-- `U` / `O`: reducir / aumentar la escala de profundidad sobre RGB.
-- `R`: reiniciar el ensamble manual.
-- Las trayectorias se inician automaticamente al estabilizar un objeto COCO;
-  no se necesita pulsar ninguna tecla. Cada una guarda 10 muestras del mismo
-  `track_id`.
-
-## YOLO y dataset RGB-D
-
-Configura estas opciones en `camera_config.json` si necesitas cambiarlas:
-
-```json
-{
-  "yolo_model": "yolo26n.pt",
-  "yolo_target_class": "person,car,dog,stop sign",
-  "yolo_traffic_only": false,
-  "yolo_confidence": 0.25,
-  "yolo_iou": 0.5,
-  "yolo_device": "cpu",
-  "yolo_tracker_config": "bytetrack_stop.yaml",
-  "yolo_dataset_dir": "evidencias_pruebas/coco_objetos",
-  "trajectory_samples": 10,
-  "trajectory_interval_seconds": 0.3,
-  "trajectory_auto_capture": true,
-  "trajectory_auto_stable_frames": 5
-}
+```powershell
+python calibrar_empalme_depth_rgb.py
 ```
+---
 
-YOLO26 se inicia automaticamente con pesos COCO. Por ahora se filtran las clases
-`person`, `car`, `dog` y `stop sign`, registradas como
-`persona`, `carro`, `perro` y `senalamiento_trafico`. No se
-selecciona color, forma ni tipo desde la interfaz.
-Los detectores anteriores por color y forma permanecen aislados en el codigo
-como referencia, pero no estan conectados al bucle principal ni tienen teclas
-para activarlos.
+## Consideraciones
 
-La deteccion nace en RGB: YOLO26 obtiene la caja, etiqueta y confianza. Despues
-esa caja se consulta sobre `depth_aligned_to_rgb` para estimar distancia,
-dimensiones y area usando la calibracion RGB-D. Arboles se dejan fuera porque
-COCO no incluye una clase `tree/arbol`.
+* Esta versión no utiliza YOLO como detector principal.
+* La detección se basa en color, forma, textura y profundidad.
+* La distancia depende de la calidad de la alineación RGB-D.
+* La lectura RGB y profundidad se realiza por ciclo de ejecución, no mediante sincronización hardware.
+* Las capturas generadas sirven como evidencia de pruebas y como base para documentación posterior.
+* La calibración puede mejorar la precisión de la medición de distancia y dimensiones.
 
-Presenta el objeto frente a la cámara. Tras cinco detecciones consecutivas,
-la aplicación inicia sola una trayectoria de 10 muestras. Cada trayectoria crea
-una carpeta independiente con:
+---
 
-- RGB JPG y etiqueta YOLO normalizada;
-- profundidad cruda y profundidad alineada a RGB en PNG de 16 bits;
-- matrices completas NPZ;
-- JSON por muestra con distancia, dimensiones, area, FPS, calibracion,
-  estadisticas y tiempos de lectura de los sensores;
-- RGB anotado con caja, confianza, Track ID, distancia y linea de trayectoria;
-- profundidad normalizada para visualizacion, sin reemplazar los crudos;
-- `trayectoria_final_rgb.jpg` y `trayectoria_final_sensores.jpg`;
-- `data.yaml` y resumen de trayectoria.
+## Autor
 
-La estructura principal se crea al iniciar:
-
-```text
-evidencias_pruebas/coco_objetos/
-|-- clase.txt
-|-- reportes/datos_sensores.csv
-`-- trayectorias/trajectory_.../
-    |-- images/
-    |-- labels/
-    |-- depth_raw/
-    |-- depth_aligned/
-    |-- raw/
-    |-- metadata/
-    |-- evidencias_rgb/
-    |-- depth_visual/
-    |-- evidencias_sensores/
-    |-- trayectoria_final_rgb.jpg
-    `-- trayectoria_final_sensores.jpg
-```
-
-Las cajas generadas por un modelo preentrenado son pseudo-etiquetas: deben
-revisarse antes de entrenar o validar un modelo propio. La lectura de RGB y
-profundidad se realiza en el mismo ciclo y el JSON registra el desfase
-observado; esto no equivale a sincronizacion hardware de ambos sensores.
-
-Los archivos de `calibration_data` no contienen bordes, mapas de color ni texto,
-por lo que pueden utilizarse posteriormente para calibracion.
-
-## Medicion y registro entre sensores
-
-La distancia se toma como la mediana de profundidad dentro de la region del
-objetivo, pero usando `depth_aligned_to_rgb`, es decir, la profundidad ya llevada
-al plano RGB.
-
-Si `fx` y `fy` estan configurados, se estiman ancho, alto y area en milimetros.
-
-## Calibracion RGB + profundidad
-
-Usa un tablero de ajedrez plano. Los valores `cols` y `rows` son las esquinas
-internas, no los cuadros impresos. Por ejemplo, un tablero de 10x7 cuadros tiene
-9x6 esquinas internas.
-
-1. Ejecuta la vision:
-
-   ```powershell
-   python orbbec_vision.py
-   ```
-
-2. Coloca el tablero en 12 a 25 posiciones diferentes:
-
-   - cerca, medio y lejos;
-   - inclinado hacia izquierda/derecha/arriba/abajo;
-   - ocupando centro, esquinas y bordes de la imagen.
-
-3. Antes de capturar, ajusta el ensamble visual con:
-
-   - `J` / `L` para izquierda/derecha;
-   - `I` / `K` para arriba/abajo;
-   - `U` / `O` para escala.
-
-   Cuando se vea bien, presiona `G` para guardar ese ensamble.
-
-4. Presiona `C` en cada pose del tablero. Cada captura guarda:
-
-   - `rgb_bgr`;
-   - `depth_raw`;
-   - `depth_aligned_to_rgb`;
-
-5. Cierra la vision y calibra. Cambia `--square-mm` por el tamano real de cada
-   cuadro del tablero:
-
-   ```powershell
-   python calibrate_rgb_depth.py --cols 9 --rows 6 --square-mm 25 --apply
-   ```
-
-El calibrador actualiza en `camera_config.json`:
-
-- `fx`, `fy`, `cx`, `cy` de RGB;
-- `rgb_dist_coeffs`;
-- `depth_scale_mm`, solo si la correccion sugerida esta dentro de un rango razonable.
-
-Ademas crea:
-
-- `calibration_data\rgb_depth_calibration_report.json`;
-- `calibration_data\debug_corners\*_corners.png`.
-
-Nota: esta calibracion usa `depth_aligned_to_rgb`, por lo que ya sirve para medir
-distancias y dimensiones en el plano RGB. Para una extrinseca fisica completa
-profundidad->RGB se necesitan tambien intrinsecos reales del sensor de profundidad
-y correspondencias visibles en profundidad, o los parametros de registro de fabrica
-del dispositivo.
+**Roode Saavedra Carrera**
+Estancia de verano — CIC
+Módulo de percepción visual con cámara Orbbec Astra+
