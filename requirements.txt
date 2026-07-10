@@ -1,0 +1,6 @@
+numpy>=1.24
+opencv-python>=4.8
+primesense
+ultralytics>=8.3
+lap>=0.5.12
+gpiozero>=2.0
