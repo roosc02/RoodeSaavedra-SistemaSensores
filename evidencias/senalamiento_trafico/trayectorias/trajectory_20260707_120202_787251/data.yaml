@@ -1,0 +1,5 @@
+path: "C:/Users/roode/orbbec_test/evidencias_pruebas/senalamiento_trafico/trayectorias/trajectory_20260707_120202_787251"
+train: images
+val: images
+names:
+  0: "senalamiento_trafico"
