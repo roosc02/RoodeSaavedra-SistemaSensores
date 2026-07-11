@@ -31,16 +31,24 @@
   "depth_to_rgb_offset_x": 0,
   "depth_to_rgb_offset_y": 0,
   "depth_to_rgb_scale": 1.0,
-  "fx": null,
-  "fy": null,
-  "cx": null,
-  "cy": null,
-  "depth_fx": null,
-  "depth_fy": null,
-  "depth_cx": null,
-  "depth_cy": null,
-  "depth_to_rgb_rotation": null,
-  "depth_to_rgb_translation_mm": null,
+  "fx": 476.280518,
+  "fy": 476.280518,
+  "cx": 324.872101,
+  "cy": 246.008423,
+  "depth_fx": 575.876282,
+  "depth_fy": 575.876282,
+  "depth_cx": 319.461517,
+  "depth_cy": 235.520355,
+  "depth_to_rgb_rotation": [
+    [0.999955, -0.009469, 0.000773],
+    [0.009469, 0.999955, -0.000759],
+    [-0.000766, 0.000766, 0.999999]
+  ],
+  "depth_to_rgb_translation_mm": [
+    -25.038206,
+    -0.130340,
+    1.364820
+  ],
   "depth_to_rgb_homography": [
     [
       0.7056908236215628,
