@@ -1,42 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Consolida las trayectorias capturadas por orbbec_vision.py (via
-TrajectoryDatasetRecorder) en un dataset YOLO listo para entrenar,
-con una sola clase: "senalamiento_trafico".
-
-ENTRADA esperada (lo que ya genera tu pipeline):
-    evidencias_pruebas/senalamiento_trafico/
-        trayectorias/
-            trajectory_20260101_120000_000001/
-                images/frame_000.jpg ...
-                labels/frame_000.txt ...   (formato YOLO: "0 cx cy w h")
-            trajectory_20260101_120500_000002/
-                ...
-
-SALIDA:
-    dataset_yolo26/
-        images/train/*.jpg   images/val/*.jpg
-        labels/train/*.txt   labels/val/*.txt
-        data.yaml
-
-El split train/val se hace POR TRAYECTORIA (no por frame individual),
-porque los frames de una misma trayectoria son casi identicos entre si
-(se capturan cada ~0.3s). Mezclar frames de la misma trayectoria entre
-train y val inflaria artificialmente las metricas de validacion.
-
-Uso basico:
-    python preparar_dataset_yolo26.py
-
-Con opciones:
-    python preparar_dataset_yolo26.py --origen evidencias_pruebas/senalamiento_trafico ^
-        --destino dataset_yolo26 --val-ratio 0.15 --negativos captures
-
---negativos apunta a una carpeta con imagenes SIN el objetivo (fondo,
-calle vacia, etc.). Es opcional pero muy recomendable: tu dataset actual
-solo tiene ejemplos POSITIVOS (el recorder solo guarda frames cuando hay
-una deteccion activa), y sin negativos el modelo aprende mas facil a
-confundir formas u objetos rojos parecidos con la señal.
-"""
 from __future__ import annotations
 
 import argparse
@@ -114,9 +75,6 @@ def split_trajectories(trayectorias: list[Path], val_ratio: float, seed: int):
 
     if len(trayectorias) < 2:
         print(
-            "[AVISO] Solo hay 1 trayectoria disponible: todo se usara como "
-            "entrenamiento y no habra validacion real. Graba mas trayectorias "
-            "(distintos angulos/distancias/fondos) antes de entrenar en serio."
         )
         return trayectorias, []
 
@@ -177,11 +135,7 @@ def main() -> None:
     print(f"  data.yaml: {data_yaml.resolve()}")
     if total_train < 100:
         print(
-            "\n[AVISO] Tienes menos de 100 imagenes de entrenamiento. YOLO26 "
-            "parte de pesos preentrenados (transfer learning), asi que puede "
-            "funcionar con poco, pero para un modelo confiable conviene grabar "
-            "mas trayectorias variando angulo, distancia, iluminacion y fondo."
-        )
+         )
 
 
 if __name__ == "__main__":
